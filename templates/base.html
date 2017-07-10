@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        <meta charset="utf-8"/>
+    </head>
+    <!-- Add navigation menu -->
+    <body>
+        <nav>
+            <ul>
+                <li><a href="/blog">Blog Homepage</a></li>
+                <li><a href="/newpost">Add a New Post</a></li>
+            </ul>
+        </nav>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>
