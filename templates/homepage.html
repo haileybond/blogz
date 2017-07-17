@@ -9,10 +9,8 @@
     {% else %}
         
         {% for post in posts %}
-            <div>
-                <h2>{{posts.title}}</h2>
-                <p>{{posts.body}}</p>
-            </div>
+            <h2><a href="./blog?id={{ post.id }}">{{post.title}}</a></h2>
+            <p>{{post.body}}</p>
         {% endfor %}
    
     {% endif %}
