@@ -1,25 +1,40 @@
 from flask import Flask, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-# TODO - update database info (check)
+# TODO - update database info (done!)
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:letsblog@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
-# TODO - add a user class with a column for foreign key user ID
+# TODO - add a user class with a column for foreign key user ID (done!)
 class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(80))
+    password = db.Column(db.String(20))
+    first_name = db.Column(db.String(40))
+    last_name = db.Column(db.String(40))
+    blogs = db.relationship('Blog', backref='blogger')
+
+# TODO - add a constructor for the User class (done!)
+    def __init__(self, email, password, first_name, last_name):
+        self.email = email
+        self.password = password
+        self.first_name = first_name
+        self.last_name = last_name
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     body = db.Column(db.String(10000))
-    # TODO assign blogs to a user via relationship
+    # TODO assign blogs to a user via relationship (done!)
+    blogger_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, blogger):
         self.title = title
         self.body = body
+        self.blogger = blogger
 
 
 @app.route('/blog', methods=['GET'])
@@ -56,6 +71,8 @@ def add_post():
             #redirect using the post id # in address (GET)
             return redirect('/blog?id=' + post_id)
     return render_template('/addpost.html')
+
+#TODO - add a "before_request" app route that will check if a user is logged in before letting them access the add post page; add other pages to an allowed routes list
 
 # TODO - add an app route + function for index.html
 
