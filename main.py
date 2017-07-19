@@ -1,18 +1,21 @@
 from flask import Flask, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-
+# TODO - update database info (check)
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:letsblog@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
-
 db = SQLAlchemy(app)
+
+# TODO - add a user class with a column for foreign key user ID
+class User(db.Model):
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     body = db.Column(db.String(10000))
+    # TODO assign blogs to a user via relationship
 
     def __init__(self, title, body):
         self.title = title
@@ -53,6 +56,19 @@ def add_post():
             #redirect using the post id # in address (GET)
             return redirect('/blog?id=' + post_id)
     return render_template('/addpost.html')
+
+# TODO - add an app route + function for index.html
+
+# TODO - add an app route + function for login.html
+# TODO - add validation for user login and create flash error messages
+# TODO - add flash message for logged in users - "You are currently loggin in"
+# TODO - "remember" that the user is logged in until they click to logout or exit the browser
+
+# TODO - add an app route + function for signup.html
+# TODO - add validation and error messages for user signup (similar to "User Signup" assignment; use flash messages?)
+
+# TODO - add a function for logout.html
+# TODO - redirect to homepage and add flask message "You have been logged out"
 
 @app.route('/')
 def index():
