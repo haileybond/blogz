@@ -4,6 +4,12 @@
         <title>{{title}}</title>
         <meta charset="utf-8"/>
         <link rel= "stylesheet" type= "text/css" href= "static/styles/base.css">
+        <style>
+            .error {
+                color: red;
+                text-decoration: none;
+            }
+        </style>
     </head>
     <!-- Add navigation menu -->
     <body>
@@ -11,9 +17,20 @@
             <ul style="list-style: none">
                 <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/blog">Blog Homepage</a></li>
                 <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/addpost">Add a New Post</a></li>
-                 <!--TODO - Add links for logging in and logging out -->
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/signup">Blogger Signup</a></li>
+                <!--TODO - Add links for logging in and logging out -->
             </ul>
         </nav>
+        
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            <ul style="list-style: none">
+            <!-- TODO - Remove list styling!! -->
+            {% for category,message in messages %}
+                <li style="text-decoration: none" class="{{category}}">{{message}}</li>
+            {% endfor %}
+            </ul>
+        {% endwith %}
+
         {% block content %}
         {% endblock %}
     </body>
