@@ -4,38 +4,48 @@
 
 {% block content %}
 <h1>Signup for a user account with Blogz!</h1>
+
+
 <form action="/signup" method="post">
     <table>
         <tr>
             <td><label for="email">Email</label></td>
             <td>
                 <input name="email" type="email" value="{{ email }}">
-            </td>
-        </tr>
-        <tr>
-            <td><label for="first_name">First Name</label></td>
-            <td>
-                <input name="first_name" type="text" value="{{ first_name }}">
-            </td>
-        </tr>
-        <tr>
-            <td><label for="last_name">Last Name</label></td>
-            <td>
-                <input name="last_name" type="text" value="{{ last_name }}">
+                {% if error %}
+                    <p><strong>Error:</strong> {{ error }}</p>
+                {% endif %}
             </td>
         </tr>
         <tr>
             <td><label for="password">Password</label></td>
             <td>
                 <input name="password" type="password">
+                <span class="error"></span>
             </td>
         </tr>
         <tr>
             <td><label for="verify">Verify Password</label></td>
             <td>
                 <input name="verify" type="password">
+                <span class="error"></span>
             </td>
         </tr>
+        <tr>
+            <td><label for="first_name">First Name</label></td>
+            <td>
+                <input name="first_name" type="text" value="{{ first_name }}">
+                <span class="error"></span>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="last_name">Last Name</label></td>
+            <td>
+                <input name="last_name" type="text" value="{{ last_name }}">
+                <span class="error"></span>
+            </td>
+        </tr>
+
     </table>
     <input type="submit" value="Register">
 </form>

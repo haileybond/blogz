@@ -1,0 +1,18 @@
+<!--TODO - Add a template that will display a single user's blog posts (only their posts) -->
+{% extends "base.html" %}
+{% block content %}
+    <p>{{ error }}</p>
+    {% if posts|length == 0 %}
+                <p>This blogger does not have any posts yet!</p>
+    {% endif %}
+    <ul>
+        {% for post in posts %}
+            <li>
+                <h4><a href="./blog?post_id={{ post.id }}">{{post.title}}</a></h4>
+                <h6>Written by <a href="./blog?user_id={{ post.owner.id }}">{{ post.owner.first_name }} {{ post.owner.last_name }}</a></h6>
+                    <!--<h6>Written by: {{post.owner.first_name}} {{post.owner.last_name}}</h6> -->
+                <p>{{post.body}}</p>
+            </li>
+        {% endfor%}
+    </ul>
+{% endblock %}

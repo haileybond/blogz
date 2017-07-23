@@ -3,7 +3,6 @@
     <head>
         <title>{{title}}</title>
         <meta charset="utf-8"/>
-        <link rel= "stylesheet" type= "text/css" href= "static/styles/base.css">
         <style>
             .error {
                 color: red;
@@ -14,10 +13,13 @@
     <!-- Add navigation menu -->
     <body>
         <nav style="background-color: grey; padding: 10px">
-            <ul style="list-style: none">
-                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/blog">Home</a></li>
+            <ul id="nav_menu" style="list-style: none">
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/">Home</a></li>
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/blog">All Posts</a></li>
                 <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/addpost">New Post</a></li>
-                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/signup">Signup</a></li>
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/signup">Sign Up</a></li>
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/login">Log In</a></li>
+                <li style="display: inline; padding: 1rem; text-decoration: none; color: white"><a href="/logout">Log Out</a></li>
                 <!--TODO - Add links for logging in and logging out -->
             </ul>
         </nav>

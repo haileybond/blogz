@@ -9,7 +9,8 @@
     {% else %}
         
         {% for post in posts %}
-            <h2><a href="./blog?id={{ post.id }}">{{post.title}}</a></h2>
+            <h2><a href="./blog?post_id={{ post.id }}">{{post.title}}</a></h2>
+            <h6>Written by <a href="./blog?user_id={{ post.owner.id }}">{{post.owner.first_name}} {{post.owner.last_name}}</a></h6>
             <p>{{post.body}}</p>
         {% endfor %}
    
