@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from hashutils import make_pw_hash, check_pw_hash
 
 # update database info (done!)
 app = Flask(__name__)
@@ -29,7 +30,7 @@ class Blog(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(80))
-    password = db.Column(db.String(20))
+    pw_hash = db.Column(db.String(120))
     first_name = db.Column(db.String(40))
     last_name = db.Column(db.String(40))
     blogs = db.relationship('Blog', backref='owner')
@@ -37,7 +38,7 @@ class User(db.Model):
 #add a constructor for the User class (done!)
     def __init__(self, email, password, first_name, last_name):
         self.email = email
-        self.password = password
+        self.pw_hash = make_pw_hash(password)
         self.first_name = first_name
         self.last_name = last_name
 
@@ -60,14 +61,14 @@ def blog():
         # if it's a post id, then redirect to the post.html template
         if post_id:
             posts = Blog.query.filter_by(id=[post_id]).all()
-            return render_template("blog.html", posts=posts)
+            return render_template("blog.html", posts=posts, page_title="Blogz")
         # if it's a user id, then redirect to the blogger.html template
         if user_id:
             posts = Blog.query.filter_by(owner_id = user_id).all()
-            return render_template("blogger.html", posts=posts)
+            return render_template("blogger.html", posts=posts, page_title="Blogz")
     #if the len == 0, it means we just want the regular blogger page
     posts = Blog.query.all()    
-    return render_template('blog.html', title="Blog", posts=posts)
+    return render_template('blog.html', page_title="Blogz", posts=posts)
 
 @app.route('/addpost', methods=['POST', 'GET'])
 def add_post():
@@ -80,7 +81,7 @@ def add_post():
         if title == "" or body == "":
             #rework error message as flash message (DONE!)
             flash('* All fields are required', 'error')
-            return render_template('/addpost.html', title=title, body=body)
+            return render_template('/addpost.html', title=title, page_title="Blogz- Add a new Post", body=body)
         else: 
             #the Blog class needs both body and title passed to it
             post = Blog(title, body, owner)
@@ -92,7 +93,7 @@ def add_post():
             post_id = str(post.id)
             #redirect using the post id # in address (GET)
             return redirect('/blog?post_id=' + post_id)
-    return render_template('/addpost.html')
+    return render_template('/addpost.html', page_title="Blogz- Add a new Post")
 
 #add an app route + function for login.html
 
@@ -104,18 +105,20 @@ def login():
         #add validation for user login and create flash error messages
         user = User.query.filter_by(email=email).first()
         
-        if user and user.password == password:
+        if user and check_pw_hash(password, user.pw_hash):
             session['email'] = email
-            flash("You are currenly logged in")
+            flash("You are currenly logged in", 'info')
             return redirect('/blog')
 
         if not user:
-            email_error = "User account does not exhist or email incorrect"
-            return render_template('login.html', email_error=email_error)
-        if User.password != password:
+            email_error = "User account does not exhist"
+            return render_template('login.html', email_error=email_error, page_title="Blogz- Log In")
+
+        if not check_pw_hash(password, user.pw_hash):
             password_error = "Password is incorrect. Please try again"
-            return render_template('login.html', password_error=password_error)
-    return render_template('login.html')
+            return render_template('login.html', password_error=password_error, page_title="Blogz- Log In")
+
+    return render_template('login.html', page_title="Blogz- Log In")
 
 
 #add an app route + function for index.html
@@ -128,56 +131,61 @@ def login():
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        verify = request.form['verify']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        
-        #add validation and error messages for user signup (similar to "User Signup" assignment; use flash messages?)
-    
-        #validate email (length, no spaces, contains @ and .) (DONE!)
-        if is_empty(email):
-            #Add error message
-            flash('* A valid email is required', 'error')
-        else:
-            if not is_correct_length(email):
-                #Add error message #email_error = "Email must be between 3 and 20 characters"
-                flash('* Email must be between 3 and 20 characters', 'error')
-                email= ''
+        input_email = request.form['email']
+        input_password = request.form['password']
+        password_hash = make_pw_hash(input_password)
+        input_verify = request.form['verify']
+        input_first_name = request.form['first_name']
+        input_last_name = request.form['last_name']
 
-        #Make sure the user doesn't already exhist
-        existing_user = User.query.filter_by(email=email).first()
+        email_error = ''
+        password_error = ''
+
+        existing_user = User.query.filter_by(email=input_email).first()
         if existing_user:
-            flash('* User account already exhists. Please log in.', 'error')
+
+            email_error = "User account already exhists. Please Log In"
             return redirect('/login')
 
-        #Validate first and last name (must not be empty) (DONE!)
-        if is_empty(first_name) or is_empty(last_name):
-            flash('* Full name is required', 'error')
-        
-        #Validate the password and verify password (DONE!)
-        if is_empty(password):
-            flash('* Password is required.', 'error')
-        elif contains_space(password):
-            flash('* Password may not contain spaces', 'error')
-        elif not is_correct_length(password):
-            flash('* Password must be between 3 and 20 characters', 'error')
-    
-        #validate that password = password (must match password)
-        if is_empty(verify):
-            flash('* Password verification is required', 'error')
-        elif password != verify:
-            flash('* Passwords must match', 'error')
 
-        if not is_empty(email) and is_correct_length(email) and not existing_user and not is_empty(first_name) and not is_empty(last_name) and not is_empty(password) and not contains_space(password) and is_correct_length(password) and password==verify:
-            new_user = User(email, password, first_name, last_name)
+        #EMAIL VALIDATION
+        if contains_space(input_email):
+            email_error = "Email must not contain spaces"
+            input_email = ''
+        if not is_correct_length(input_email):
+            email_error = "Email must be between 3 and 40 characters"
+            input_email = ''
+        if not valid_email(input_email):
+            email_error = "Email must contain these symbols: '@' and '.'"
+            input_email = ''
+
+
+        #PASSWORD VALIDATION
+        if contains_space(input_password):
+            password_error = "Email must contain these symbols: '@' and '.'"
+            input_password = ''
+        if not is_correct_length(input_password):
+            password_error = "Email must be between 3 and 40 characters"
+            input_password = ''
+        if input_password != input_verify:
+            password_error = "Passwords must match"
+            input_password = ''
+            verify_password = ''
+
+        if password_error or email_error:
+            return render_template('signup.html', password_error = password_error, email_error = email_error, email = input_email, first_name=input_first_name, last_name=input_last_name)   
+
+
+        #IF NO ERRORS:
+        if not password_error and not email_error:
+            new_user = User(input_email, password_hash, input_first_name, input_last_name)
             db.session.add(new_user)
             db.session.commit()
-            session['email'] = email
+            session['email'] = input_email
             flash("You are currenly logged in")
-            return redirect('/') 
-    return render_template('signup.html')
+            return redirect('/')
+
+    return render_template('signup.html', page_title="Blogz- Sign Up")
 
 
 #add a function for logout.html
@@ -193,12 +201,8 @@ def logout():
 #FUNCTIONS FOR SIGNUP VALIDATION
 
     
-def is_empty(input):
-    if not input:
-        return True
-
 def is_correct_length(input):
-    if len(input) >= 3 and len(input) <= 20:
+    if len(input) >= 3 and len(input) <= 40:
         return True
     
 def contains_space(input):
@@ -216,14 +220,14 @@ def valid_email(input):
         if each_char == '.':
             period_count = period_count + 1
 
-    if period_count == 1 and at_count == 1:
+    if period_count >= 1 and at_count == 1:
         return True
 
 
 @app.route('/')
 def index():
     users = User.query.all() 
-    return render_template('index.html', title="Blog Users", users=users)
+    return render_template('index.html', page_title="Blogz- Blogger Index", users=users)
 
 if __name__ == '__main__':
     app.run()

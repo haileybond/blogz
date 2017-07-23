@@ -1,31 +1,41 @@
 <!--TODO - Add a template for logging in -->
 {% extends "base.html" %}
 {% block content %}
+<div class="row">
+    <div class="col-xs-10">       
+        <h1 class="page-header">Log In</h1>
+    </div>
+</div>
 
-<h1>Log In</h1>
-<p>If you don't have an account, you may <a href="/signup">sign up</a> for one</p>
-<form action="/login" method="POST">
-    <table>
-        <tr>
-            <td><label for="email">Email</label></td>
-            <td>
-                <input name="email" type="email" value="{{ email }}">
-            </td>
-            <td>
-                <p class="error">{{email_error}}</p>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="password">Password</label></td>
-            <td>
-                <input name="password" type="password">
-            </td>
-            <td>
-                <p class="error">{{password_error}}</p>
-            </td>
-        </tr>
-    </table>
-    <input type="submit" value="Login">
-</form>
+<div class="row">
+    <div class="col-xs-10">
+        <p>If you don't have an account, you may <a href="/signup">sign up</a> for one</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-10">
+        <form action="/login" method="POST">
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input name="email" type="email" value="{{ email }}" class="form-control" required="required">
+            </div>
+
+            <p class="error" style="color:red;">{{email_error}}</p>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input name="password" type="password" class="form-control" required="required">
+            </div>
+
+            <p class="error" style="color:red;">{{password_error}}</p>
+            
+            <div class="form-group">
+                <button type="submit" value="Login" class="btn btn-success">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

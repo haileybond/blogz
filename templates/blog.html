@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Blog</h1>
-
-    {% if posts|length ==0 %}
-    <p>No blog posts yet</p>
-    
-    {% else %}
-        
-        {% for post in posts %}
-            <h2><a href="./blog?post_id={{ post.id }}">{{post.title}}</a></h2>
-            <h6>Written by <a href="./blog?user_id={{ post.owner.id }}">{{post.owner.first_name}} {{post.owner.last_name}}</a></h6>
+    <div class = "row">
+        <div class="col-xs-10">
+            <h1 class="page-header">Blog</h1>
+        </div>
+        <div class="col-xs-10">
+            {% if posts|length ==0 %}
+                <p>No blog posts yet</p>
+            {% else %}
+        </div>
+        <div class="col-xs-10">
+            {% for post in posts %}
+                <h2><a href="./blog?post_id={{ post.id }}">{{post.title}}</a></h2>
+                <h5>Written by <a href="./blog?user_id={{ post.owner.id }}">{{post.owner.first_name}} {{post.owner.last_name}}</a></h5>
             <p>{{post.body}}</p>
-        {% endfor %}
-   
+            {% endfor %}
+        </div>
     {% endif %}
 {% endblock %}
