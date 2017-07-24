@@ -20,20 +20,16 @@
             <div class="form-group">
                 <label for="email">Email</label>
                 <input name="email" type="email" value="{{ email }}" class="form-control" required="required">
+                <p class="error" style="color:red;">{{email_error}}</p>
             </div>
-
-            <p class="error" style="color:red;">{{email_error}}</p>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input name="password" type="password" class="form-control" required="required">
+                <input name="password" type="text" class="form-control" required="required" value="{{ password }}">
+                <p class="error" style="color:red;">{{password_error}}</p>
             </div>
 
-            <p class="error" style="color:red;">{{password_error}}</p>
-            
-            <div class="form-group">
-                <button type="submit" value="Login" class="btn btn-success">Submit</button>
-            </div>
+            <button type="submit" value="Login" class="btn btn-success">Submit</button>
         </form>
     </div>
 </div>

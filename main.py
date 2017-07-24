@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from hashutils import make_pw_hash, check_pw_hash
+import hashlib
 
 # update database info (done!)
 app = Flask(__name__)
@@ -36,20 +37,20 @@ class User(db.Model):
     blogs = db.relationship('Blog', backref='owner')
 
 #add a constructor for the User class (done!)
-    def __init__(self, email, password, first_name, last_name):
+    def __init__(self, email, pw_hash, first_name, last_name):
         self.email = email
-        self.pw_hash = make_pw_hash(password)
+        self.pw_hash = make_pw_hash(pw_hash)
         self.first_name = first_name
         self.last_name = last_name
 
 #add a "before_request" app route that will check if a user is logged in before letting them access the add post page; add other pages to an allowed routes list
 @app.before_request
 def require_login():
-    allowed_routes = ['login', 'signup', 'blog', 'index']
+    allowed_routes = ['login', 'signup', 'blog', 'index', '']
     if request.endpoint not in allowed_routes and 'email' not in session:
         return redirect('/login')
 
-@app.route('/blog', methods=['GET'])
+@app.route('/blog', methods=['POST', 'GET'])
 def blog():
     #if the request is just /blogs, then the length of request.args = 0, and it
     # means that there is no request for a specific post or a user's posts. If there
@@ -105,11 +106,6 @@ def login():
         #add validation for user login and create flash error messages
         user = User.query.filter_by(email=email).first()
         
-        if user and check_pw_hash(password, user.pw_hash):
-            session['email'] = email
-            flash("You are currenly logged in", 'info')
-            return redirect('/blog')
-
         if not user:
             email_error = "User account does not exhist"
             return render_template('login.html', email_error=email_error, page_title="Blogz- Log In")
@@ -117,6 +113,11 @@ def login():
         if not check_pw_hash(password, user.pw_hash):
             password_error = "Password is incorrect. Please try again"
             return render_template('login.html', password_error=password_error, page_title="Blogz- Log In")
+        
+        if user and check_pw_hash(password, user.pw_hash):
+            session['email'] = user.email
+            flash("You are currenly logged in")
+            return redirect('/')
 
     return render_template('login.html', page_title="Blogz- Log In")
 
@@ -133,7 +134,6 @@ def signup():
     if request.method == 'POST':
         input_email = request.form['email']
         input_password = request.form['password']
-        password_hash = make_pw_hash(input_password)
         input_verify = request.form['verify']
         input_first_name = request.form['first_name']
         input_last_name = request.form['last_name']
@@ -143,42 +143,39 @@ def signup():
 
         existing_user = User.query.filter_by(email=input_email).first()
         if existing_user:
-
-            email_error = "User account already exhists. Please Log In"
+            flash("User account already exhists. Please Log In.", 'info')
             return redirect('/login')
-
 
         #EMAIL VALIDATION
         if contains_space(input_email):
-            email_error = "Email must not contain spaces"
+            email_error = "* Email must not contain spaces"
             input_email = ''
         if not is_correct_length(input_email):
-            email_error = "Email must be between 3 and 40 characters"
+            email_error = "* Email must be between 3 and 40 characters"
             input_email = ''
         if not valid_email(input_email):
-            email_error = "Email must contain these symbols: '@' and '.'"
+            email_error = "* Email must contain these symbols: '@' and '.'"
             input_email = ''
 
 
         #PASSWORD VALIDATION
         if contains_space(input_password):
-            password_error = "Email must contain these symbols: '@' and '.'"
+            password_error = "* Email must contain these symbols: '@' and '.'"
             input_password = ''
         if not is_correct_length(input_password):
-            password_error = "Email must be between 3 and 40 characters"
+            password_error = "* Email must be between 3 and 40 characters"
             input_password = ''
         if input_password != input_verify:
-            password_error = "Passwords must match"
+            password_error = "* Passwords must match"
             input_password = ''
             verify_password = ''
 
         if password_error or email_error:
             return render_template('signup.html', password_error = password_error, email_error = email_error, email = input_email, first_name=input_first_name, last_name=input_last_name)   
 
-
         #IF NO ERRORS:
         if not password_error and not email_error:
-            new_user = User(input_email, password_hash, input_first_name, input_last_name)
+            new_user = User(input_email, input_password, input_first_name, input_last_name)
             db.session.add(new_user)
             db.session.commit()
             session['email'] = input_email
@@ -192,7 +189,7 @@ def signup():
 @app.route('/logout')
 def logout():
     del session['email']
-    flash("You have been logged out")
+    flash("You have been logged out.")
     return redirect('/')
 
 #redirect to homepage and add flask message "You have been logged out"
@@ -222,6 +219,8 @@ def valid_email(input):
 
     if period_count >= 1 and at_count == 1:
         return True
+
+
 
 
 @app.route('/')
